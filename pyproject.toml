@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "whispers-translate"
+version = "0.1.0"
+description = ""
+authors = ["fsadannn <fsadannn@gmail.com>"]
+readme = "README.md"
+packages = [{include = "whispers_translate"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pyaudio = {version = "^0.2.13",markers = "sys_platform == 'linux' or platform_system == 'Linux'"}
+pyaudiowpatch = {version = "^0.2.12.5", markers = "sys_platform == 'win32' or platform_system == 'Windows'"}
+speechrecognition = "^3.9.0"
+openai-whisper = "^20230117"
+pydub = "^0.25.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
