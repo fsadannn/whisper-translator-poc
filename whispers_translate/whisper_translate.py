@@ -2,10 +2,11 @@ import os
 import tempfile
 from typing import Optional
 
-# import numpy as np
-import speech_recognition as sr
+import numpy as np
 import torch
 import whisper
+
+from .types import AudioDataP
 
 
 class WhisperTranslator:
@@ -28,7 +29,7 @@ class WhisperTranslator:
             self._model_name, device=device)
         self._is_model_loaded = True
 
-    def translate(self, audio_data: sr.AudioData, language: Optional[str] = None, translate=False, show_dict=False, **transcribe_options):
+    def translate(self, audio_data: AudioDataP, language: Optional[str] = None, translate=False, show_dict=False, **transcribe_options):
         """ Performs speech recognition on ``audio_data`` (an ``AudioData`` instance), using Whisper.
 
             The recognition language is determined by ``language``, an uncapitalized full language name like "english" or "chinese". See the full language list at https://github.com/openai/whisper/blob/main/whisper/tokenizer.py
@@ -40,40 +41,34 @@ class WhisperTranslator:
         if not self._is_model_loaded:
             self._load_model()
 
-        try:
-            f = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
-            f.write(audio_data.get_wav_data())
-            f.flush()
-            result = self.model.transcribe(
-                f.name,
-                language=language,
-                task="translate" if translate else None,
-                fp16=torch.cuda.is_available(),
-                **transcribe_options
-            )
-        finally:
-            f.close()
-            try:
-                os.remove(f.name)
-            except:
-                pass
+        # try:
+        #     f = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+        #     f.write(audio_data.get_wav_data())
+        #     f.flush()
+        #     result = self.model.transcribe(
+        #         f.name,
+        #         language=language,
+        #         task="translate" if translate else None,
+        #         fp16=torch.cuda.is_available(),
+        #         **transcribe_options
+        #     )
+        # finally:
+        #     f.close()
+        #     try:
+        #         os.remove(f.name)
+        #     except:
+        #         pass
 
-        # data = np.frombuffer(audio_data.get_raw_data(), np.int16).flatten().astype(
-        #     np.float32) / 32768.0
+        data = np.frombuffer(audio_data.get_raw_data(), np.int16).flatten().astype(
+            np.float32) / 32768.0
 
-        # # if audio_data.
-        # chunk_length = len(data) // 2
-
-        # data = data.reshape((chunk_length, 2))
-        # data = data.mean(axis=1)
-
-        # result = self.model.transcribe(
-        #     data,
-        #     language=language,
-        #     task="translate" if translate else None,
-        #     fp16=torch.cuda.is_available(),
-        #     **transcribe_options
-        # )
+        result = self.model.transcribe(
+            data,
+            language=language,
+            task="translate" if translate else None,
+            fp16=torch.cuda.is_available(),
+            **transcribe_options
+        )
 
         # print("WhisperTranslator.translate",result)
 

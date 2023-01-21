@@ -1,9 +1,6 @@
 import audioop
 import multiprocessing
 import threading
-import time
-from ctypes import c_wchar_p
-from queue import Empty
 
 import flet
 import speech_recognition as sr
@@ -88,6 +85,9 @@ def translations_worker(results_queue):
         translation: str = results_queue.get()
 
         if listener_thread_event.is_set():
+            continue
+
+        if translation is None:
             continue
 
         if translation == '':

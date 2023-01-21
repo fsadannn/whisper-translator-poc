@@ -12,6 +12,8 @@ from typing import List
 import speech_recognition as sr
 from pydub import AudioSegment
 
+from .config import SAMPLE_RATE
+
 
 @dataclass
 class DeviceInfo:
@@ -152,7 +154,8 @@ class AudioInput(sr.AudioSource):
                     input_device_index=self.device_index, channels=self.CHANNELS, format=self.format,
                     rate=self.SAMPLE_RATE, frames_per_buffer=self.CHUNK, input=True,
                 ),
-                self.SAMPLE_WIDTH,
+                sample_width=self.SAMPLE_WIDTH,
+                sample_rate=self.SAMPLE_RATE,
                 channels=self.CHANNELS,
             )
         except Exception as e:
@@ -169,14 +172,22 @@ class AudioInput(sr.AudioSource):
             self.audio.terminate()
 
     class AudioInputStream(object):
-        def __init__(self, pyaudio_stream, sample_width: int, channels: int = 1):
+        def __init__(self, pyaudio_stream, sample_width: int, sample_rate: int, channels: int = 1):
             self.pyaudio_stream = pyaudio_stream
             self.channels = channels
             self.sample_width = sample_width
+            self.sample_rate = sample_rate
 
         def read(self, size):
             buffer = self.pyaudio_stream.read(
                 size, exception_on_overflow=False)
+
+            # resampling to whisper default sample rate
+            if self.sample_rate != SAMPLE_RATE:
+                buffer, _ = audioop.ratecv(
+                    buffer, self.sample_width, self.channels, self.sample_rate, SAMPLE_RATE, None)
+
+            # convert to mono audio
             if self.channels > 1:
                 buffer = audioop.tomono(
                     buffer, self.sample_width, 0.5, 0.5)
@@ -232,7 +243,7 @@ class AudioFile(sr.AudioSource):
         assert self.stream is None, "This audio source is already inside a context manager"
 
         self.stream = AudioFile.FileInputStream(
-            self.raw_data, self.SAMPLE_WIDTH, self.CHANNELS, self._current_position)
+            self.raw_data, self.SAMPLE_WIDTH, self.SAMPLE_RATE, self.CHANNELS, self._current_position)
 
         return self
 
@@ -243,14 +254,22 @@ class AudioFile(sr.AudioSource):
         return None
 
     class FileInputStream(object):
-        def __init__(self, data, sample_width: int, channels: int = 1, current_position=0):
+        def __init__(self, data, sample_width: int, sample_rate: int, channels: int = 1, current_position=0):
             self.pyaudio_stream = data
             self.channels = channels
             self.sample_width = sample_width
             self._current_position = current_position
+            self.sample_rate = sample_rate
 
         def read(self, size):
             buffer = self.pyaudio_stream[self._current_position:self._current_position + size]
+
+            # resampling to whisper default sample rate
+            if self.sample_rate != SAMPLE_RATE:
+                buffer, _ = audioop.ratecv(
+                    buffer, self.sample_width, self.channels, self.sample_rate, SAMPLE_RATE, None)
+
+            # convert to mono audio
             if self.channels > 1:
                 buffer = audioop.tomono(
                     buffer, self.sample_width, 0.5, 0.5)
