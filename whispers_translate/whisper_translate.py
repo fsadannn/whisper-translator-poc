@@ -9,16 +9,24 @@ import whisper
 
 
 class WhisperTranslator:
-    __slots__ = ('model',)
+    __slots__ = ('model', '_is_model_loaded', '_model_name')
 
-    def __init__(self, model="base"):
+    def __init__(self, model="base", lazy=True):
+        self._is_model_loaded = False
+        self.model: whisper.Whisper = None
+        self._model_name = model
+        if not lazy:
+            self._load_model()
+
+    def _load_model(self):
         device = None
 
         if torch.cuda.is_available():
             device = torch.cuda.device(0)
 
         self.model: whisper.Whisper = whisper.load_model(
-            model, device=device)
+            self._model_name, device=device)
+        self._is_model_loaded = True
 
     def translate(self, audio_data: sr.AudioData, language: Optional[str] = None, translate=False, show_dict=False, **transcribe_options):
         """ Performs speech recognition on ``audio_data`` (an ``AudioData`` instance), using Whisper.
@@ -29,6 +37,9 @@ class WhisperTranslator:
 
             You can translate the result to english with Whisper by passing translate=True
         """
+        if not self._is_model_loaded:
+            self._load_model()
+
         try:
             f = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
             f.write(audio_data.get_wav_data())
@@ -80,6 +91,9 @@ class WhisperTranslator:
 
             You can translate the result to english with Whisper by passing translate=True
         """
+
+        if not self._is_model_loaded:
+            self._load_model()
 
         result = self.model.transcribe(
             path,

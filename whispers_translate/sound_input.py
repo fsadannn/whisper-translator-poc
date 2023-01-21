@@ -6,9 +6,17 @@ except ImportError:
     _IS_WINDOWS = False
 
 import audioop
+from dataclasses import dataclass
+from typing import List
 
 import speech_recognition as sr
 from pydub import AudioSegment
+
+
+@dataclass
+class DeviceInfo:
+    name: str
+    index: int
 
 
 class AudioInput(sr.AudioSource):
@@ -71,23 +79,7 @@ class AudioInput(sr.AudioSource):
         self.stream = None
 
     @staticmethod
-    def get_pyaudio():
-        """
-        Imports the pyaudio module and checks its version. Throws exceptions if pyaudio can't be found or a wrong version is installed
-        """
-        # try:
-        #     import pyaudio
-        # except ImportError:
-        #     raise AttributeError("Could not find PyAudio; check installation")
-        # from distutils.version import LooseVersion
-        # if LooseVersion(pyaudio.__version__) < LooseVersion("0.2.11"):
-        #     raise AttributeError(
-        #         "PyAudio 0.2.11 or later is required (found version {})".format(pyaudio.__version__))
-        # return pyaudio
-        return pyaudio
-
-    @staticmethod
-    def list_microphone_names():
+    def list_microphone_names() -> List[DeviceInfo]:
         """
         Returns a list of the names of all available microphones. For microphones where the name can't be retrieved, the list entry contains ``None`` instead.
 
@@ -95,10 +87,15 @@ class AudioInput(sr.AudioSource):
         """
         audio = pyaudio.PyAudio()
         try:
-            result = []
+            result: List[DeviceInfo] = []
             for i in range(audio.get_device_count()):
                 device_info = audio.get_device_info_by_index(i)
-                result.append(device_info.get("name"))
+
+                if device_info['maxInputChannels'] == 0:
+                    continue
+                result.append(DeviceInfo(
+                    name=device_info['name'], index=device_info['index']))
+
         finally:
             audio.terminate()
         return result

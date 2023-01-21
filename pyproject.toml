@@ -13,6 +13,7 @@ pyaudiowpatch = {version = "^0.2.12.5", markers = "sys_platform == 'win32' or pl
 speechrecognition = "^3.9.0"
 openai-whisper = "^20230117"
 pydub = "^0.25.1"
+flet = "^0.3.2"
 
 
 [build-system]

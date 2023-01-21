@@ -16,4 +16,9 @@ lock:
 	poetry lock
 
 
+dev:
+	poetry run flet -r -d main.py
 
+
+run:
+	poetry run flet main.py
