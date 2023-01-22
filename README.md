@@ -11,7 +11,7 @@ We are using [poetry](https://python-poetry.org/) as venv manager to has all app
  1. You need `make` in your system ( i think that all UNIX based systems has this program )
     * Windows users should download from [make installer page](https://gnuwin32.sourceforge.net/packages/make.htm) and meke avaible in your path (meaning that you can call make from the terminal)
  2. You need `python` 3.8 or above in your system ( i think that all UNIX based systems has this program )
-    * Windows users should install python from Microsof Store or download from the [python page](https://www.python.org/downloads/)
+    * Windows users should install python from Microsoft Store or download from the [python page](https://www.python.org/downloads/)
  3. Open a terminal in the root project and run `make install` or `make win-install` if you are on Windows.
  4. Run `make run` on your terminal
     * the first time whisper model need to be downloaded, you should see a progress bar on the terminal
