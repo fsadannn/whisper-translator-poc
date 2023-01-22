@@ -70,8 +70,6 @@ class WhisperTranslator:
             **transcribe_options
         )
 
-        # print("WhisperTranslator.translate",result)
-
         if show_dict:
             return result
         else:
