@@ -12,7 +12,7 @@ We are using [poetry](https://python-poetry.org/) as venv manager to has all app
     * Windows users should download from [make installer page](https://gnuwin32.sourceforge.net/packages/make.htm) and meke avaible in your path (meaning that you can call make from the terminal)
  2. You need `python` 3.8 or above in your system ( i think that all UNIX based systems has this program )
     * Windows users should install python from Microsoft Store or download from the [python page](https://www.python.org/downloads/)
- 3. Whisper need `ffmpeg` if they are going to process a file, but we aren't no using a file, all data is pass on memory so i think we don't need it. If you have any unexpected error related with this, please install `ffmpeg` in your system.
+ 3. Whisper need `ffmpeg` if they are going to process a file, but we aren't using a file, all data is pass on memory so i think we don't need it. If you have any unexpected error related with this, please install `ffmpeg` in your system.
  4. Open a terminal in the root project and run `make install` or `make win-install` if you are on Windows.
  5. Run `make run` on your terminal
     * the first time whisper model need to be downloaded, you should see a progress bar on the terminal
