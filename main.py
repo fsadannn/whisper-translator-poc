@@ -176,6 +176,11 @@ def main(page: Page):
 
     def change_language(e):
         current_value: str = languages_dropdown.current.value
+
+        if current_value == 'Automatic':
+            shared_data['language'] = None
+            return
+
         shared_data['language'] = current_value.lower()
 
     page.add(
@@ -185,7 +190,8 @@ def main(page: Page):
                 options=[
                     DropdownOption('Spanish'),
                     DropdownOption('English'),
-                    DropdownOption('Japanese')
+                    DropdownOption('Japanese'),
+                    DropdownOption('Automatic')
                 ],
                 on_change=change_language, ref=languages_dropdown)
         ])
