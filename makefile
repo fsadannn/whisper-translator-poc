@@ -19,3 +19,6 @@ dev:
 
 run:
 	poetry run flet main.py
+
+requirements:
+	poetry export -f requirements.txt --output requirements.txt --without-hashes
