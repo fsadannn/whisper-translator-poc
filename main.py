@@ -13,7 +13,7 @@ from flet import (
     Container,
     Dropdown,
     ElevatedButton,
-    KeyboardType,
+    IconButton,
     ListView,
     Page,
     Ref,
@@ -24,6 +24,7 @@ from flet import (
     alignment,
     border,
     colors,
+    icons,
 )
 from flet.dropdown import Option as DropdownOption
 
@@ -199,10 +200,32 @@ def main(page: Page):
 
     languages_dropdown.current.value = 'English'
 
-    page.add(Dropdown(
-        options=[DropdownOption(device.name) for device in devices],
-        ref=devices_dropdown
-    ))
+    def stop_listening(e):
+        if not listen_switch.current.value:
+            return
+
+        listen_switch.current.value = False
+        listen_switch.current.on_change(None)
+        listen_switch.current.update()
+
+    def reload_devices(e):
+        nonlocal devices
+        devices = AudioInput.list_microphone_names()
+        current_value = devices_dropdown.current.value
+        devices_dropdown.current.options = [
+            DropdownOption(device.name) for device in devices]
+        devices_dropdown.current.value = current_value
+        devices_dropdown.current.update()
+
+        stop_listening(None)
+
+    page.add(Row([
+        Dropdown(
+            options=[DropdownOption(device.name) for device in devices],
+            ref=devices_dropdown, expand=True, on_change=stop_listening),
+        IconButton(icons.REFRESH, on_click=reload_devices)
+    ])
+    )
 
     devices_dropdown.current.value = devices[0].name
 
@@ -213,8 +236,6 @@ def main(page: Page):
 
     def listen_device(e):
         nonlocal listener_thread
-
-        print('listen_device', listen_switch.current.value)
 
         if not listen_switch.current.value:
             listener_thread_event.set()
@@ -244,14 +265,6 @@ def main(page: Page):
                 target=listener_worker, args=(device_index, audio_queue, listener_thread_event, shared_data))
             listener_thread.start()
 
-    def start_phrase_time_limit(e):
-        if not listen_switch.current.value:
-            return
-
-        listen_switch.current.value = False
-        listen_switch.current.on_change(None)
-        listen_switch.current.update()
-
     def end_phrase_time_limit(e):
         value: float = phrase_time_limit_slider.current.value
         shared_data['phrase_time_limit'] = value
@@ -265,7 +278,7 @@ def main(page: Page):
             Row([
                 Text('Phrase time limit', ref=phrase_time_limit_text),
                 Slider(label="Phrase time limit {value}s", min=1.0, max=30.0,
-                       divisions=29 * 2, on_change_start=start_phrase_time_limit, on_change_end=end_phrase_time_limit, ref=phrase_time_limit_slider),
+                       divisions=29 * 2, on_change_start=stop_listening, on_change_end=end_phrase_time_limit, ref=phrase_time_limit_slider),
             ])
 
         ], alignment='spaceBetween')
