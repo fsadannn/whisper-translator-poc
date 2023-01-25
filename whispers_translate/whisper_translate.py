@@ -22,8 +22,8 @@ class WhisperTranslator:
     def _load_model(self):
         device = None
 
-        if torch.cuda.is_available():
-            device = torch.cuda.device(0)
+        # if torch.cuda.is_available():
+        #     device = torch.cuda.device(0)
 
         self.model: whisper.Whisper = whisper.load_model(
             self._model_name, device=device)
